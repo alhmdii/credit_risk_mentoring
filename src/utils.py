@@ -1,32 +1,37 @@
+import os 
+import yaml 
+import joblib 
 import pandas as pd
-import joblib
-import yaml
-import os
+import logging
 from pathlib import Path
 from typing import Tuple, Any, Dict
-from sklearn.model_selection import train_test_split
+
+logger = logging.getLogger(__name__)
 
 def get_project_root() -> Path:
     """Mengembalikan path ke root folder project"""
     return Path(__file__).resolve().parent.parent
 
 def load_config(filename: str = "config.yaml") -> Dict[str, Any]:
+    """
+    Memuat file config
 
+    Args:
+        filename (str, optional): nama file config. Defaults to "config.yaml".
+
+    Returns:
+        Dict[str, Any]: file config
+    """
+    #Mengembalikan path ke root folder project
     root = get_project_root()
+
+    #Membaca path folder config
     path_config = root / "config" / filename
 
+    #Memuat file config dengan yaml safe load
     with open(path_config, "r") as file:
         config = yaml.safe_load(file)
 
-    config["path_raw_dir"] = str(root / config["directories"]["raw"])
-    config["path_interim_dir"] = str(root / config["directories"]["interim"])
-    config["path_processed_dir"] = str(root / config["directories"]["processed"])
-    config["path_raw_data"] = str(root / config["directories"]["raw"] / config["files"]["dataset_name"])
-
-    interim_files = config["files"]["interim"]
-    for key, filename in interim_files.items():
-        full_path = Path(config["path_interim_dir"]) / filename
-        config[f"path_{key}"] = str(full_path)    
     return config
 
 def load_data(fname: str) -> pd.DataFrame:
@@ -37,76 +42,29 @@ def load_data(fname: str) -> pd.DataFrame:
         fname (str): lokasi file (path) .csv 
 
     Returns: 
-        pd.DataFrame: DataFrame yang berisi data dari file CSV tersebut
+        pd.DataFrame: Dataset yang berisi data dari file CSV tersebut
     """
-    if not os.path.exists(fname):
-        raise FileNotFoundError(f"File tidak ditemukan di {fname}")
+    #Membaca dari root folder project
+    root = get_project_root()
 
-    data = pd.read_csv(fname)
-    print(f"Data Shape: {data.shape}")
+    #Setelah root, baru masuk ke file
+    filepath  = root / fname
 
+    if not filepath.exists():
+        #Rekam jejak error sebelum program dimatikan
+        logger.error(f"   -> GAGAL: File tidak ditemukan pada path {filepath}")
+        raise FileNotFoundError(f"File tidak ditemukan di {filepath}")
+
+    #Catat proses yang sedang berjalan
+    logger.info(f"   -> Mulai memuat data dari: {filepath}")
+    
+    #Memanggil pandas utk membaca file
+    data = pd.read_csv(filepath)
+    
+    # Catat keberhasilan dan bentuk datanya
+    logger.info(f"   -> Sukses memuat data. Dimensi dataset: {data.shape}")
+    
     return data
-
-def split_input_output(data: pd.DataFrame, target_col: str) -> Tuple[pd.DataFrame, pd.Series]:
-    """
-    Memisahkan dataset menjadi fitur (X) dan target (y)
-
-    Fungsi ini menghapus kolom target dari dataframe utama untuk membuat
-    kumpulan fitur, dan mengekstrak kolom target tersebut secara terpisah 
-
-    Args:
-        data (pd.DataFrame): Dataframe asli (raw) yang berisi fitur dan target
-        target_col (str): Nama kolom yang akan dijadikan label/target
-
-    Returns:
-        Tuple[pd.DataFrame, pd.Series]:
-            - X (pd.DataFrame): fitur (semua kolom kecuali target)
-            - y (pd.Series): target (hanya kolom target)
-    """
-
-    X = data.drop(target_col, axis=1)
-    y = data[target_col]
-
-    print(f"Original data shape: {data.shape}")
-    print(f"X data shape       : {X.shape}")
-    print(f"y data shape       : {y.shape}")
-
-    return X, y
-
-def split_train_test(
-        X: pd.DataFrame,
-        y: pd.Series,
-        test_size: float,
-        random_state: int
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-    """
-    Membagi data menjadi training set dan testing set
-    Fungsi ini menggunakan train_test_split dari sklearn untuk memastikan 
-    konsistensi random state
-
-    Args:
-        X (pd.DataFrame): Fitur
-        y (pd.Series): Target
-        test_size (float): Proporsi data untuk test set (0.0 - 1.0)
-        random_state (int): Seed untuk reproduksibilitas hasil
-
-    Returns:
-        Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-            Urutannya adalah: (X_train, X_test, y_train, y_test)
-    """
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=test_size,
-        random_state=random_state,
-        stratify=y
-    )
-
-    print(f"X train shape: {X_train.shape}")
-    print(f"X test shape : {X_test.shape}")
-    print(f"y train shape: {y_train.shape}")
-    print(f"y test shape : {y_test.shape}")
-
-    return X_train, X_test, y_train, y_test
 
 def serialize_data(data: Any, path: str) -> None:
     """
@@ -119,11 +77,18 @@ def serialize_data(data: Any, path: str) -> None:
         data (Any): Objek yang ingin disimpan, bisa berupa DataFrame, list, atau model
         path (str): Lokasi dan nama file tujuan
     """
+    #Membaca dari root folder project
+    root = get_project_root()
 
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    #Setelah root, baru masuk ke file
+    filepath  = root / path
+
+    #Buat direktori jika belum ada 
+    os.makedirs(filepath.parent, exist_ok=True)
     
-    joblib.dump(data, path)
-    print(f"Sukses menyimpan data ke: {path}")
+    joblib.dump(data, filepath)
+
+    logger.info(f"   -> Sukses menyimpan data ke: {filepath}")
 
 def deserialize_data(path: str) -> Any:
     """
@@ -137,8 +102,14 @@ def deserialize_data(path: str) -> Any:
     Returns:
         Any: Objek asli yang sebelumnya disimpan 
     """
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"File .pkl tidak ditemuka di {path}")
+    #Membaca dari root folder project
+    root = get_project_root()
 
-    data = joblib.load(path)
-    return data
+    #Setelah root, baru masuk ke file
+    filepath  = root / path
+
+    if not filepath.exists():
+        logger.error(f"File tidak ditemukan: {filepath}")
+        raise FileNotFoundError(f"File .pkl tidak ditemukan di {filepath}")
+    
+    return joblib.load(filepath)
