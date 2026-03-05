@@ -1,1 +1,12 @@
 path_raw_data: data/raw/credit_risk_dataset.csv
+target_col: loan_status
+random_state: 123
+path_train_set:
+- data/interim/X_train.pkl
+- data/interim/y_train.pkl
+path_valid_set:
+- data/interim/X_valid.pkl
+- data/interim/y_valid.pkl
+path_test_set:
+- data/interim/X_test.pkl
+- data/interim/y_test.pkl
