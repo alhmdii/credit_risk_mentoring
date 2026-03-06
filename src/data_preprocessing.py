@@ -181,7 +181,9 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
     logger.info("    -> Fungsi transform_median_imputation: informasi count na sebelum dilakukan imputasi:")
     logger.info(f"\n{data[cols_to_check].isna().sum()}")
 
+    
     standard_impute_dict = {k:v for k, v in imputation_data.items() if k != "median_starting_age"}
+
     if standard_impute_dict:
         data.fillna(standard_impute_dict, inplace=True)
 
@@ -197,8 +199,8 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
     logger.info(f"\n{data[cols_to_check].isna().sum()}")
     
     logger.info("   Fungsi transform_median_imputation selesai.")
-    return data
 
+    return data
 
 def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
 
@@ -226,7 +228,6 @@ def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
     logger.info("   Fungsi float_convert selesai.")
     return data
 
-
 def fit_mode_imputation(data: pd.DataFrame, cat_cols: List[str]) -> Dict[str, str]:
 
     logger.info("   Memulai fungsi fit_mode_imputation.")
@@ -246,7 +247,6 @@ def fit_mode_imputation(data: pd.DataFrame, cat_cols: List[str]) -> Dict[str, st
     logger.info(f"    -> Fungsi fit_mode_imputation: proses fitting selesai, hasil: {imputation_data}")
     logger.info("   Fungsi fit_mode_imputation selesai.")
     return imputation_data
-
 
 def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str]) -> pd.DataFrame:
 
@@ -272,7 +272,6 @@ def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str
 
     logger.info("   Fungsi transform_mode_imputation selesai.")
     return data
-
 
 def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
 
@@ -301,5 +300,3 @@ def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
     
     logger.info("   Fungsi object_convert selesai.")
     return data
-
-
