@@ -1,3 +1,57 @@
+bin_cb_person_cred_hist_length:
+- -.inf
+- 2.5
+- 4.5
+- 8.5
+- .inf
+bin_loan_amnt:
+- -.inf
+- 7500.0
+- 12500.0
+- 18000.0
+- 22000.0
+- .inf
+bin_loan_int_rate:
+- -.inf
+- 6.5
+- 9.5
+- 13
+- 14.5
+- 15.5
+- .inf
+bin_loan_percent_income:
+- -.inf
+- 0.1
+- 0.2
+- 0.3
+- 0.4
+- .inf
+bin_person_age:
+- 0
+- 23
+- 28
+- 100
+bin_person_emp_length:
+- -.inf
+- 0.5
+- 1.5
+- 2.5
+- 4.5
+- 11.5
+- .inf
+bin_person_income:
+- -.inf
+- 35000.0
+- 60000.0
+- 80000.0
+- .inf
+categorical_grouping:
+  loan_grade:
+    E: D
+    F: D
+    G: D
+  person_home_ownership:
+    OTHER: RENT
 columns_cat:
 - person_home_ownership
 - loan_intent
@@ -25,24 +79,44 @@ columns_predictors:
 - cb_person_default_on_file
 path_imputer_median: models/imputer_median.pkl
 path_imputer_mode: models/imputer_mode.pkl
+path_ohe: models/ohe_model.pkl
 path_raw_data: data/raw/credit_risk_dataset.csv
 path_test_clean:
 - data/processed/X_test_clean.pkl
 - data/processed/y_test_clean.pkl
+path_test_encoded:
+- data/modeling_ready/X_test_encoded.pkl
+- data/modeling_ready/X_test_encoded.pkl
 path_test_set:
 - data/interim/X_test.pkl
 - data/interim/y_test.pkl
+path_test_woe:
+- data/modeling_ready/X_test_woe.pkl
+- data/modeling_ready/y_test_woe.pkl
 path_train_clean:
 - data/processed/X_train_clean.pkl
 - data/processed/y_train_clean.pkl
+path_train_encoded:
+- data/modeling_ready/X_train_encoded.pkl
+- data/modeling_ready/X_train_encoded.pkl
 path_train_set:
 - data/interim/X_train.pkl
 - data/interim/y_train.pkl
+path_train_woe:
+- data/modeling_ready/X_train_woe.pkl
+- data/modeling_ready/y_train_woe.pkl
 path_valid_clean:
 - data/processed/X_valid_clean.pkl
 - data/processed/y_valid_clean.pkl
+path_valid_encoded:
+- data/modeling_ready/X_valid_encoded.pkl
+- data/modeling_ready/X_valid_encoded.pkl
 path_valid_set:
 - data/interim/X_valid.pkl
 - data/interim/y_valid.pkl
+path_valid_woe:
+- data/modeling_ready/X_valid_woe.pkl
+- data/modeling_ready/y_valid_woe.pkl
+path_woe_mappings: models/woe_mappings.pkl
 random_state: 123
 target_col: loan_status
