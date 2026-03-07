@@ -178,10 +178,12 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
     if "median_starting_age" in imputation_data:
         cols_to_check.append("person_emp_length")
     
-    logger.info("    -> Fungsi transform_median_imputation: informasi count na sebelum dilakukan imputasi:")
-    logger.info(f"\n{data[cols_to_check].isna().sum()}")
+    logger.info("    -> Fungsi transform_median_imputation: informasi count na SEBELUM dilakukan imputasi:")
+    na_sebelum = data[cols_to_check].isna().sum().to_dict()
+    for col, count in na_sebelum.items():
+        logger.info(f"       - {col}: {count} NaN")
 
-    
+
     standard_impute_dict = {k:v for k, v in imputation_data.items() if k != "median_starting_age"}
 
     if standard_impute_dict:
@@ -195,8 +197,10 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
             calculated_emp = calculated_emp.apply(lambda x: max(0, x))
             data.loc[missing_emp_idx, "person_emp_length"] = calculated_emp
         
-    logger.info("    -> Fungsi transform_median_imputation: informasi count na setelah dilakukan imputasi:")
-    logger.info(f"\n{data[cols_to_check].isna().sum()}")
+    logger.info("    -> Fungsi transform_median_imputation: informasi count na SESUDAH dilakukan imputasi:")
+    na_sesudah = data[cols_to_check].isna().sum().to_dict()
+    for col, count in na_sesudah.items():
+        logger.info(f"       - {col}: {count} NaN")
     
     logger.info("   Fungsi transform_median_imputation selesai.")
 
@@ -217,13 +221,17 @@ def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
     valid_cols = [col for col in num_cols if col in data.columns]
 
     logger.info("    -> Fungsi float_convert: tipe data SEBELUM konversi:")
-    logger.info(f"\n{data[valid_cols].dtypes}")
+    dtypes_sebelum = data[valid_cols].dtypes.astype(str).to_dict()
+    for col, dtype in dtypes_sebelum.items():
+        logger.info(f"       - {col}: {dtype}")
 
     for col in valid_cols:
         data[col] = data[col].astype("float64")
 
     logger.info("    -> Fungsi float_convert: tipe data SESUDAH konversi:")
-    logger.info(f"\n{data[valid_cols].dtypes}")
+    dtypes_sesudah = data[valid_cols].dtypes.astype(str).to_dict()
+    for col, dtype in dtypes_sesudah.items():
+        logger.info(f"       - {col}: {dtype}")
 
     logger.info("   Fungsi float_convert selesai.")
     return data
@@ -244,7 +252,8 @@ def fit_mode_imputation(data: pd.DataFrame, cat_cols: List[str]) -> Dict[str, st
         if col in data.columns:
             imputation_data[col] = data[col].mode()[0]
             
-    logger.info(f"    -> Fungsi fit_mode_imputation: proses fitting selesai, hasil: {imputation_data}")
+    logger.info(f"    -> Fungsi fit_mode_imputation: proses fitting selesai, hasil:")
+    logger.info(f"     {imputation_data}")
     logger.info("   Fungsi fit_mode_imputation selesai.")
     return imputation_data
 
@@ -263,12 +272,16 @@ def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str
     valid_cols = list(imputation_data.keys())
 
     logger.info("    -> Fungsi transform_mode_imputation: count na SEBELUM imputasi:")
-    logger.info(f"\n{data[valid_cols].isna().sum()}")
+    na_sebelum = data[valid_cols].isna().sum().to_dict()
+    for col, count in na_sebelum.items():
+        logger.info(f"       - {col}: {count} NaN")
 
     data.fillna(imputation_data, inplace=True)
     
     logger.info("    -> Fungsi transform_mode_imputation: count na SESUDAH imputasi:")
-    logger.info(f"\n{data[valid_cols].isna().sum()}")
+    na_sesudah = data[valid_cols].isna().sum().to_dict()
+    for col, count in na_sesudah.items():
+        logger.info(f"       - {col}: {count} NaN")
 
     logger.info("   Fungsi transform_mode_imputation selesai.")
     return data
@@ -290,13 +303,108 @@ def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
     valid_cols = [col for col in cat_cols if col in data.columns]
 
     logger.info("    -> Fungsi object_convert: tipe data SEBELUM konversi:")
-    logger.info(f"\n{data[valid_cols].dtypes}")
+    dtypes_sebelum = data[valid_cols].dtypes.astype(str).to_dict()
+    for col, dtype in dtypes_sebelum.items():
+        logger.info(f"       - {col}: {dtype}")
     
     for col in valid_cols:
         data[col] = data[col].astype("object")
     
     logger.info("    -> Fungsi object_convert: tipe data SESUDAH konversi:")
-    logger.info(f"\n{data[valid_cols].dtypes}")
+    dtypes_sesudah = data[valid_cols].dtypes.astype(str).to_dict()
+    for col, dtype in dtypes_sesudah.items():
+        logger.info(f"       - {col}: {dtype}")
     
     logger.info("   Fungsi object_convert selesai.")
     return data
+
+def main():
+    logger.info("=== MEMULAI PIPELINE DATA PREPROCESSING ===")
+
+    # 1. Memuat file konfigurasi
+    logger.info("1. Memuat file konfigurasi (config.yaml)")
+    config = load_config()
+
+    # 2. Memuat data hasil split (Deserialize)
+    logger.info("2. Memuat data hasil split (Train, Valid, Test)")
+    X_train = deserialize_data(config["path_train_set"][0])
+    y_train = deserialize_data(config["path_train_set"][1])
+    
+    X_valid = deserialize_data(config["path_valid_set"][0])
+    y_valid = deserialize_data(config["path_valid_set"][1])
+    
+    X_test = deserialize_data(config["path_test_set"][0])
+    y_test = deserialize_data(config["path_test_set"][1])
+
+    # 3. Drop Duplicates (HANYA UNTUK TRAIN SET)
+    logger.info("3. Melakukan Drop Duplicates (Hanya pada Data Training)")
+    X_train, y_train = drop_duplicate_data(X_train, y_train)
+
+    # 4. Filter Domain Outliers (Ubah nilai mustahil ke NaN)
+    logger.info("4. Memfilter Outlier berdasarkan Logika Domain")
+    X_train = filter_domain_outliers(X_train)
+    X_valid = filter_domain_outliers(X_valid)
+    X_test = filter_domain_outliers(X_test)
+
+    # 5. Imputasi Numerikal (Median & Domain Rule)
+    logger.info("5. Melakukan Imputasi Data Numerikal")
+    # Fit HANYA di X_train, lalu simpan ke .pkl
+    imputer_median_dict = fit_median_imputation(X_train, config["columns_num"])
+    serialize_data(imputer_median_dict, config["path_imputer_median"])
+
+    # Transform ke semua set data
+    X_train = transform_median_imputation(X_train, imputer_median_dict)
+    X_valid = transform_median_imputation(X_valid, imputer_median_dict)
+    X_test = transform_median_imputation(X_test, imputer_median_dict)
+
+    # 6. Imputasi Kategorikal (Modus)
+    logger.info("6. Melakukan Imputasi Data Kategorikal")
+    # Fit HANYA di X_train, lalu simpan ke .pkl
+    imputer_mode_dict = fit_mode_imputation(X_train, config["columns_cat"])
+    serialize_data(imputer_mode_dict, config["path_imputer_mode"])
+
+    # Transform ke semua set data
+    X_train = transform_mode_imputation(X_train, imputer_mode_dict)
+    X_valid = transform_mode_imputation(X_valid, imputer_mode_dict)
+    X_test = transform_mode_imputation(X_test, imputer_mode_dict)
+
+    # 7. Penyeragaman Tipe Data (Casting)
+    logger.info("7. Melakukan Penyeragaman Tipe Data (Casting)")
+    # Numerikal menjadi float64
+    X_train = float_convert(X_train, config["columns_num"])
+    X_valid = float_convert(X_valid, config["columns_num"])
+    X_test = float_convert(X_test, config["columns_num"])
+
+    # Kategorikal menjadi object
+    X_train = object_convert(X_train, config["columns_cat"])
+    X_valid = object_convert(X_valid, config["columns_cat"])
+    X_test = object_convert(X_test, config["columns_cat"])
+
+    # 8. Menyimpan Data Bersih (Serialization)
+    logger.info("8. Menyimpan Dataset yang Telah Dibersihkan (Serialization)")
+    serialize_data(X_train, config["path_train_clean"][0])
+    serialize_data(y_train, config["path_train_clean"][1])
+
+    serialize_data(X_valid, config["path_valid_clean"][0])
+    serialize_data(y_valid, config["path_valid_clean"][1])
+
+    serialize_data(X_test, config["path_test_clean"][0])
+    serialize_data(y_test, config["path_test_clean"][1])
+
+    logger.info("=== PIPELINE DATA PREPROCESSING SELESAI ===")
+
+
+if __name__ == "__main__":
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+
+    try:
+        main()
+    except Exception as e:
+        logger.critical(f"PIPELINE GAGAL ERROR: {str(e)}")
+        raise e
