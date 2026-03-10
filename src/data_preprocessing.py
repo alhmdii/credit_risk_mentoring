@@ -157,6 +157,20 @@ def fit_median_imputation(data: pd.DataFrame, subset_data: List[str]) -> Dict[st
     return imputation_data
 
 def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, float]) -> pd.DataFrame:
+    """
+    Fungsi untuk transormasi dataset yang memiliki np.NaN dengan mengisi mediannya yang sudah dicari di fitur fit sebelumnya
+
+    Args:
+        data (pd.DataFrame): Dataset fitur input yang ingin diisi NaNnya (pd.DataFrame)
+        imputation_data (Dict[str, float]): Dictionary yang menyimpan nilai median pada masing masing fitur
+
+    Raises:
+        TypeError: Tipe data tidak sesuai 
+        TypeError: Tipe data tidak sesuai
+
+    Returns:
+        pd.DataFrame: Dataset yang sudah bersih dari np.NaN
+    """
 
     logger.info("   Memulai fungsi transform_median_imputation.")
 
@@ -181,12 +195,14 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
     for col, count in na_sebelum.items():
         logger.info(f"       - {col}: {count} NaN")
 
-
+    #Dict untuk menyimpan impute value selain lama bekerja
     standard_impute_dict = {k:v for k, v in imputation_data.items() if k != "median_starting_age"}
 
+    #Pengisian kolom NaN selain fitur lama bekerja
     if standard_impute_dict:
         data.fillna(standard_impute_dict, inplace=True)
 
+    #Pengisian fitur lama bekerja yang NaN
     if "median_starting_age" in imputation_data and "person_emp_length" in data.columns:
         missing_emp_idx = data["person_emp_length"].isna()
 
@@ -205,6 +221,20 @@ def transform_median_imputation(data: pd.DataFrame, imputation_data: Dict[str, f
     return data
 
 def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
+    """
+    Penyeragaman tipe data kolom numerikal ke float64
+
+    Args:
+        data (pd.DataFrame): Dataset fitur input
+        num_cols (List[str]): List kolom numerikal
+
+    Raises:
+        TypeError: Tipe data tidak sesuai
+        TypeError: Tipe data tidak sesuai 
+
+    Returns:
+        pd.DataFrame: Dataset dengan kolom numerikal yang sudah seragam
+    """
 
     logger.info("   Memulai fungsi float_convert.")
 
@@ -214,8 +244,10 @@ def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
         raise TypeError("Fungsi float_convert: parameter num_cols harus bertipe list.")
     else:
         logger.info("    -> Fungsi float_convert: parameter telah divalidasi.")
-    
+
+    #Jangan ubdah data asli
     data = data.copy()
+    #Pengecekan kolom apakah yang ada di list numerikal terdapat di kolom dataset
     valid_cols = [col for col in num_cols if col in data.columns]
 
     logger.info("    -> Fungsi float_convert: tipe data SEBELUM konversi:")
@@ -223,6 +255,7 @@ def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
     for col, dtype in dtypes_sebelum.items():
         logger.info(f"       - {col}: {dtype}")
 
+    #Pengubahan kolom numerikal ke "float64"
     for col in valid_cols:
         data[col] = data[col].astype("float64")
 
@@ -232,30 +265,64 @@ def float_convert(data: pd.DataFrame, num_cols: List[str]) -> pd.DataFrame:
         logger.info(f"       - {col}: {dtype}")
 
     logger.info("   Fungsi float_convert selesai.")
+
     return data
 
 def fit_mode_imputation(data: pd.DataFrame, cat_cols: List[str]) -> Dict[str, str]:
+    """
+    Pencarian modus pada kolom kategorikal di dataset untuk mengisi np.NaN
+
+    Args:
+        data (pd.DataFrame): Dataset input yang ingin dicari modus pada kolom kategorinya
+        cat_cols (List[str]): List kolom kategorikal
+
+    Raises:
+        TypeError: Tipe data tidak sesuai
+        TypeError: Tipe data tidak sesuai 
+
+    Returns:
+        Dict[str, str]: Dict yang berisi modus setiap fitur kategorikal 
+    """
 
     logger.info("   Memulai fungsi fit_mode_imputation.")
 
     if not isinstance(data, pd.DataFrame):
         raise TypeError("Fungsi fit_mode_imputation: parameter data harus bertipe DataFrame.")
-    elif not isinstance(cat_cols, list): # Typo cat_col -> cat_cols telah diperbaiki di sini
+    elif not isinstance(cat_cols, list): 
         raise TypeError("Fungsi fit_mode_imputation: parameter cat_cols harus bertipe list.")
     else:
         logger.info("    -> Fungsi fit_mode_imputation: parameter telah divalidasi.")
 
+    #Dict kosong untuk menyimpan modus kategori pada data kategorikal 
     imputation_data = {}
+
     for col in cat_cols:
+        #Pengecekan apakah kolom di cat_cols terdapat di input dataset
         if col in data.columns:
+            #Mengisi dict kosong tadi dengan modus di kolom tersebut
             imputation_data[col] = data[col].mode()[0]
             
     logger.info(f"    -> Fungsi fit_mode_imputation: proses fitting selesai, hasil:")
     logger.info(f"     {imputation_data}")
     logger.info("   Fungsi fit_mode_imputation selesai.")
+
     return imputation_data
 
 def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str]) -> pd.DataFrame:
+    """
+    Pengisian kolom kategorikal yang berisi NaN dengan modus yang sudah dicari pada fitur fit sebelumnya
+
+    Args:
+        data (pd.DataFrame): Dataset yang berisi kolom kategorikal yang ingin diimputasi 
+        imputation_data (Dict[str, str]): Dict yang berisi modus utk setiap kolom kategorikal
+
+    Raises:
+        TypeError: Tipe data tidak sesuai 
+        TypeError: Tipe data tidak sesuai 
+
+    Returns:
+        pd.DataFrame: Dataset yang kolom kategorikalnya sudah bersih dari np.NaN
+    """
 
     logger.info("   Memulai fungsi transform_mode_imputation.")
 
@@ -265,7 +332,8 @@ def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str
         raise TypeError("Fungsi transform_mode_imputation: parameter imputation_data harus bertipe dict.")
     else:
         logger.info("    -> Fungsi transform_mode_imputation: parameter telah divalidasi.")
-        
+    
+    #Jangan ubah data asli 
     data = data.copy()
     valid_cols = list(imputation_data.keys())
 
@@ -273,7 +341,8 @@ def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str
     na_sebelum = data[valid_cols].isna().sum().to_dict()
     for col, count in na_sebelum.items():
         logger.info(f"       - {col}: {count} NaN")
-
+    
+    #Mengisi np.NaN dengan imputation data yang sudah dicari
     data.fillna(imputation_data, inplace=True)
     
     logger.info("    -> Fungsi transform_mode_imputation: count na SESUDAH imputasi:")
@@ -282,9 +351,24 @@ def transform_mode_imputation(data: pd.DataFrame, imputation_data: Dict[str, str
         logger.info(f"       - {col}: {count} NaN")
 
     logger.info("   Fungsi transform_mode_imputation selesai.")
+
     return data
 
 def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
+    """
+    Penyeragaman tipe data kolom kategorikal menjadi "object"
+
+    Args:
+        data (pd.DataFrame): Dataset dengan kolom kategorikal yang ingin diseragamkan tipe datanya
+        cat_cols (List[str]): List kolom kategorikal 
+
+    Raises:
+        TypeError: Tipe data tidak sesuai 
+        TypeError: Tipe data tidak sesuai 
+
+    Returns:
+        pd.DataFrame: Dataset dengan kolom kategorikal yang tipenya sudah seragam menjadi "object" 
+    """
 
     logger.info("   Memulai fungsi object_convert.")
 
@@ -298,6 +382,7 @@ def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
     logger.info("    -> Fungsi object_convert: memulai konversi")
     data = data.copy()
 
+    #Pengecekan apakah list input kolom kategorikal ada di input dataset 
     valid_cols = [col for col in cat_cols if col in data.columns]
 
     logger.info("    -> Fungsi object_convert: tipe data SEBELUM konversi:")
@@ -305,6 +390,7 @@ def object_convert(data: pd.DataFrame, cat_cols: List[str]) -> pd.DataFrame:
     for col, dtype in dtypes_sebelum.items():
         logger.info(f"       - {col}: {dtype}")
     
+    #Mengubah semua tipe data kolom kategorikal dengan "object"
     for col in valid_cols:
         data[col] = data[col].astype("object")
     
@@ -339,47 +425,51 @@ def main():
     X_train, y_train = drop_duplicate_data(X_train, y_train)
 
     # 4. Filter Domain Outliers (Ubah nilai mustahil ke NaN)
-    logger.info("4. Memfilter Outlier berdasarkan Logika Domain")
+    logger.info("4. Memfilter Outlier Umur dan Lama Bekerja")
     X_train = filter_domain_outliers(X_train)
     X_valid = filter_domain_outliers(X_valid)
     X_test = filter_domain_outliers(X_test)
 
     # 5. Imputasi Numerikal (Median & Domain Rule)
     logger.info("5. Melakukan Imputasi Data Numerikal")
-    # Fit HANYA di X_train, lalu simpan ke .pkl
+    #Hanya fit ke X_train
     imputer_median_dict = fit_median_imputation(X_train, config["columns_num"])
+    #Simpan nilai imputatasi (Serialize)
     serialize_data(imputer_median_dict, config["path_imputer_median"])
 
-    # Transform ke semua set data
+    #Transform ke semua set data
     X_train = transform_median_imputation(X_train, imputer_median_dict)
     X_valid = transform_median_imputation(X_valid, imputer_median_dict)
     X_test = transform_median_imputation(X_test, imputer_median_dict)
 
     # 6. Imputasi Kategorikal (Modus)
     logger.info("6. Melakukan Imputasi Data Kategorikal")
-    # Fit HANYA di X_train, lalu simpan ke .pkl
+    #Hanya fit ke X_train
     imputer_mode_dict = fit_mode_imputation(X_train, config["columns_cat"])
+    #Simpan modus imputasi (Serialize)
     serialize_data(imputer_mode_dict, config["path_imputer_mode"])
 
-    # Transform ke semua set data
+    #Transform ke semua set data
     X_train = transform_mode_imputation(X_train, imputer_mode_dict)
     X_valid = transform_mode_imputation(X_valid, imputer_mode_dict)
     X_test = transform_mode_imputation(X_test, imputer_mode_dict)
 
     # 7. Penyeragaman Tipe Data (Casting)
     logger.info("7. Melakukan Penyeragaman Tipe Data (Casting)")
-    # Numerikal menjadi float64
+
+    #Numerikal menjadi float64
     X_train = float_convert(X_train, config["columns_num"])
     X_valid = float_convert(X_valid, config["columns_num"])
     X_test = float_convert(X_test, config["columns_num"])
 
-    # Kategorikal menjadi object
+    #Kategorikal menjadi object
     X_train = object_convert(X_train, config["columns_cat"])
     X_valid = object_convert(X_valid, config["columns_cat"])
     X_test = object_convert(X_test, config["columns_cat"])
 
     # 8. Menyimpan Data Bersih (Serialization)
     logger.info("8. Menyimpan Dataset yang Telah Dibersihkan (Serialization)")
+    
     serialize_data(X_train, config["path_train_clean"][0])
     serialize_data(y_train, config["path_train_clean"][1])
 

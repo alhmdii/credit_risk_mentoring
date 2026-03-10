@@ -52,17 +52,17 @@ def load_data(fname: str) -> pd.DataFrame:
 
     if not filepath.exists():
         #Rekam jejak error sebelum program dimatikan
-        logger.error(f"   -> GAGAL: File tidak ditemukan pada path {filepath}")
+        logger.error(f"    -> GAGAL: File tidak ditemukan pada path {filepath}")
         raise FileNotFoundError(f"File tidak ditemukan di {filepath}")
 
     #Catat proses yang sedang berjalan
-    logger.info(f"   -> Mulai memuat data dari: {filepath}")
+    logger.info(f"    -> Mulai memuat data dari: {filepath}")
     
     #Memanggil pandas utk membaca file
     data = pd.read_csv(filepath)
     
     # Catat keberhasilan dan bentuk datanya
-    logger.info(f"   -> Sukses memuat data. Dimensi dataset: {data.shape}")
+    logger.info(f"    -> Sukses memuat data. Dimensi dataset: {data.shape}")
     
     return data
 
@@ -88,7 +88,7 @@ def serialize_data(data: Any, path: str) -> None:
     
     joblib.dump(data, filepath)
 
-    logger.info(f"   -> Sukses menyimpan data ke: {filepath}")
+    logger.info(f"    -> Sukses menyimpan data ke: {filepath}")
 
 def deserialize_data(path: str) -> Any:
     """

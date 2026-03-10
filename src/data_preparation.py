@@ -29,11 +29,11 @@ def split_input_output(data: pd.DataFrame, target_col: str) -> Tuple[pd.DataFram
     X = data.drop(target_col, axis=1)
     y = data[target_col]
 
-    logger.info("   -> -----------------------------------")
-    logger.info(f"   -> Original data shape : {data.shape}")
-    logger.info("   -> -----------------------------------")
-    logger.info(f"   -> X data shape        : {X.shape}")
-    logger.info(f"   -> y data shape        : {y.shape}")
+    logger.info("    -> -----------------------------------")
+    logger.info(f"    -> Original data shape : {data.shape}")
+    logger.info("    -> -----------------------------------")
+    logger.info(f"    -> X data shape        : {X.shape}")
+    logger.info(f"    -> y data shape        : {y.shape}")
 
     return X, y
 
@@ -102,15 +102,15 @@ def main():
         random_state=RANDOM_STATE
     )
 
-    logger.info("   -> -----------------------------------")
-    logger.info(f"   -> X_train shape : {X_train.shape}")
-    logger.info(f"   -> y_train shape : {y_train.shape}")
-    logger.info("   -> -----------------------------------")
-    logger.info(f"   -> X_valid shape : {X_valid.shape}")
-    logger.info(f"   -> y_valid shape : {y_valid.shape}")
-    logger.info("   -> -----------------------------------")
-    logger.info(f"   -> X_test shape : {X_test.shape}")
-    logger.info(f"   -> y_test shape : {y_test.shape}")
+    logger.info("    -> -----------------------------------")
+    logger.info(f"    -> X_train shape : {X_train.shape}")
+    logger.info(f"    -> y_train shape : {y_train.shape}")
+    logger.info("    -> -----------------------------------")
+    logger.info(f"    -> X_valid shape : {X_valid.shape}")
+    logger.info(f"    -> y_valid shape : {y_valid.shape}")
+    logger.info("    -> -----------------------------------")
+    logger.info(f"    -> X_test shape : {X_test.shape}")
+    logger.info(f"    -> y_test shape : {y_test.shape}")
 
     # 5. Serialization (Menyimpan seluruh data)
     logger.info("5. Menyimpan Dataset Hasil Pembagian Split Train, Valid, Test (Serialization)")
