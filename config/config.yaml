@@ -79,6 +79,7 @@ columns_predictors:
 - cb_person_default_on_file
 path_imputer_median: models/imputer_median.pkl
 path_imputer_mode: models/imputer_mode.pkl
+path_iv_summary: data/modeling_ready/iv_summary.csv
 path_ohe: models/ohe_model.pkl
 path_raw_data: data/raw/credit_risk_dataset.csv
 path_test_clean:
@@ -86,7 +87,7 @@ path_test_clean:
 - data/processed/y_test_clean.pkl
 path_test_encoded:
 - data/modeling_ready/X_test_encoded.pkl
-- data/modeling_ready/X_test_encoded.pkl
+- data/modeling_ready/y_test_encoded.pkl
 path_test_set:
 - data/interim/X_test.pkl
 - data/interim/y_test.pkl
@@ -98,7 +99,7 @@ path_train_clean:
 - data/processed/y_train_clean.pkl
 path_train_encoded:
 - data/modeling_ready/X_train_encoded.pkl
-- data/modeling_ready/X_train_encoded.pkl
+- data/modeling_ready/y_train_encoded.pkl
 path_train_set:
 - data/interim/X_train.pkl
 - data/interim/y_train.pkl
@@ -110,7 +111,7 @@ path_valid_clean:
 - data/processed/y_valid_clean.pkl
 path_valid_encoded:
 - data/modeling_ready/X_valid_encoded.pkl
-- data/modeling_ready/X_valid_encoded.pkl
+- data/modeling_ready/y_valid_encoded.pkl
 path_valid_set:
 - data/interim/X_valid.pkl
 - data/interim/y_valid.pkl
