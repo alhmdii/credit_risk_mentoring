@@ -82,6 +82,7 @@ path_imputer_mode: models/imputer_mode.pkl
 path_iv_summary: data/modeling_ready/iv_summary.csv
 path_ohe: models/ohe_model.pkl
 path_raw_data: data/raw/credit_risk_dataset.csv
+path_scorecard_dict: models/api_scorecard_dict.pkl
 path_test_clean:
 - data/processed/X_test_clean.pkl
 - data/processed/y_test_clean.pkl

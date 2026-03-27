@@ -9,3 +9,7 @@ fastapi
 jupyterlab
 requests
 statsmodels
+fastapi[standard]
+uvicorn
+streamlit
+pytest

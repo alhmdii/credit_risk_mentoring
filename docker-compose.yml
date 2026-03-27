@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  #Container Backend (FastAPI)
+  api:
+    build: 
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: credit_scoring_api
+    ports:
+      - "8000:8000"
+    networks:
+      - credit_network
+    #Memastikan API benar-benar siap sebelum UI boleh menyala
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  #Container UI (Streamlit)
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    container_name: credit_scoring_ui
+    ports:
+      - "8501:8501"
+    environment:
+      #Injeksi URL API ke dalam environment variable UI
+      - API_URL=http://api:8000/predict
+    networks:
+      - credit_network
+    #UI hanya akan menyala JIKA status API sudah "Healthy"
+    depends_on:
+      api:
+        condition: service_healthy
+
+networks:
+  credit_network:
+    driver: bridge
